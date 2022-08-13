@@ -12,18 +12,27 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
 
-
 @RestController
-public class CircuitBreakerController  {
-	
+public class CircuitBreakerController {
+
 	private Logger logger = LoggerFactory.getLogger(CircuitBreakerController.class);
-	
+
+	@GetMapping("/sample-api-dummy-url")
+	@Retry(name="default")
+	public String sampleApiDummyUrl() {
+		logger.info("Sample api call dummy-url recived ");
+		ResponseEntity<String> forEntity = new RestTemplate().getForEntity("http://localhost:8080/some-dummy-url",
+				String.class);
+		return forEntity.getBody();
+
+	}
+
 	@GetMapping("/sample-api")
-	//@Retry(name="sample-api", fallbackMethod="hardcodedResponse")
-	@CircuitBreaker(name="default", fallbackMethod="hardcodedResponse")
-	//@RateLimiter(name="default")
-	//10s => 1000 calls to the sample-api
-	@Bulkhead(name="sample-api")
+	// @Retry(name="sample-api", fallbackMethod="hardcodedResponse")
+	@CircuitBreaker(name = "default", fallbackMethod = "hardcodedResponse")
+	// @RateLimiter(name="default")
+	// 10s => 1000 calls to the sample-api
+	@Bulkhead(name = "sample-api")
 	public String sampleApi() {
 		logger.info("Sample api call recived ");
 		/*
@@ -33,7 +42,7 @@ public class CircuitBreakerController  {
 		 */
 		return "sample-api";
 	}
-	
+
 	public String hardcodedResponse(Exception ex) {
 		return "fallback-response";
 	}
